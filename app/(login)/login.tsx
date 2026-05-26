@@ -15,16 +15,10 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
-  const authAction = async (
-    prevState: ActionState | void,
-    formData: FormData
-  ) => {
-    return (mode === 'signin' ? signIn : signUp)(prevState ?? {}, formData);
-  };
-  const [state, formAction, pending] = useActionState<
-    ActionState | void,
-    FormData
-  >(authAction, { error: '' });
+  const [state, formAction, pending] = useActionState<ActionState, FormData>(
+    mode === 'signin' ? signIn : signUp,
+    { error: '' }
+  );
   const formState = state ?? {};
 
   return (

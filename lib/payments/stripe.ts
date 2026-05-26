@@ -21,7 +21,7 @@ export async function createCheckoutSession({
   const user = await getUser();
 
   if (!team || !user) {
-    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
+    return redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -43,12 +43,12 @@ export async function createCheckoutSession({
     }
   });
 
-  redirect(session.url!);
+  return redirect(session.url!);
 }
 
 export async function createCustomerPortalSession(team: Team) {
   if (!team.stripeCustomerId || !team.stripeProductId) {
-    redirect('/pricing');
+    return redirect('/pricing');
   }
 
   let configuration: Stripe.BillingPortal.Configuration;
