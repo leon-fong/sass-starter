@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { signToken, verifyToken } from "@/lib/auth/session";
+import {
+  createSessionExpiry,
+  getSessionCookieOptions,
+  SESSION_COOKIE_NAME,
+  signToken,
+  verifyToken,
+} from "@/lib/auth/session";
 
 const protectedRoutes = "/dashboard";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get("session");
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
 
   if (isProtectedRoute && !sessionCookie) {
@@ -18,22 +24,19 @@ export async function proxy(request: NextRequest) {
   if (sessionCookie && request.method === "GET") {
     try {
       const parsed = await verifyToken(sessionCookie.value);
-      const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const expiresInOneDay = createSessionExpiry();
 
       res.cookies.set({
-        name: "session",
+        name: SESSION_COOKIE_NAME,
         value: await signToken({
           ...parsed,
           expires: expiresInOneDay.toISOString(),
         }),
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        expires: expiresInOneDay,
+        ...getSessionCookieOptions(expiresInOneDay),
       });
     } catch (error) {
       console.error("Error updating session:", error);
-      res.cookies.delete("session");
+      res.cookies.delete(SESSION_COOKIE_NAME);
       if (isProtectedRoute) {
         return NextResponse.redirect(new URL("/sign-in", request.url));
       }

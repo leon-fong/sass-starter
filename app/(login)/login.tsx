@@ -15,10 +15,17 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    mode === 'signin' ? signIn : signUp,
-    { error: '' }
-  );
+  const authAction = async (
+    prevState: ActionState | void,
+    formData: FormData
+  ) => {
+    return (mode === 'signin' ? signIn : signUp)(prevState ?? {}, formData);
+  };
+  const [state, formAction, pending] = useActionState<
+    ActionState | void,
+    FormData
+  >(authAction, { error: '' });
+  const formState = state ?? {};
 
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -51,7 +58,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 name="email"
                 type="email"
                 autoComplete="email"
-                defaultValue={state.email}
+                defaultValue={formState.email}
                 required
                 maxLength={50}
                 className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
@@ -75,7 +82,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 autoComplete={
                   mode === 'signin' ? 'current-password' : 'new-password'
                 }
-                defaultValue={state.password}
+                defaultValue={formState.password}
                 required
                 minLength={8}
                 maxLength={100}
@@ -85,8 +92,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             </div>
           </div>
 
-          {state?.error && (
-            <div className="text-red-500 text-sm">{state.error}</div>
+          {formState?.error && (
+            <div className="text-red-500 text-sm">{formState.error}</div>
           )}
 
           <div>

@@ -16,7 +16,12 @@ import {
   ActivityType,
   invitations
 } from '@/lib/db/schema';
-import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
+import {
+  comparePasswords,
+  hashPassword,
+  SESSION_COOKIE_NAME,
+  setSession
+} from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createCheckoutSession } from '@/lib/payments/stripe';
@@ -225,7 +230,7 @@ export async function signOut() {
   const user = (await getUser()) as User;
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
-  (await cookies()).delete('session');
+  (await cookies()).delete(SESSION_COOKIE_NAME);
 }
 
 const updatePasswordSchema = z.object({
@@ -333,7 +338,7 @@ export const deleteAccount = validatedActionWithUser(
         );
     }
 
-    (await cookies()).delete('session');
+    (await cookies()).delete(SESSION_COOKIE_NAME);
     redirect('/sign-in');
   }
 );
