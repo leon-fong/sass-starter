@@ -8,11 +8,11 @@ export function Terminal() {
   const [copied, setCopied] = useState(false);
   const terminalSteps = [
     'cd saas-starter',
-    'pnpm install',
-    'pnpm db:setup',
-    'pnpm db:migrate',
-    'pnpm db:seed',
-    'pnpm dev 🎉',
+    'bun install',
+    'bun run db:setup',
+    'bun run db:migrate',
+    'bun run db:seed',
+    'bun run dev 🎉',
   ];
 
   useEffect(() => {
